@@ -3,6 +3,8 @@ import pygame
 from config import config
 from maze import maze
 
+maze.find_path()
+
 mouse_imgs = [
     "assets/mouse.png",
     "assets/mouse_run1.png",
@@ -28,6 +30,7 @@ wall_img = pygame.transform.scale(wall_img, (config["SCALING_FACTOR"], config["S
 mouse = pygame.transform.scale(mouse, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 
 
+
 pygame.init()
 
 # Cria a tela do jogo de acordo com o tamanho do labirinto e o fator de escala (64 pixels, exemplo: labirinto 8x8, tela: 512x512)
@@ -37,11 +40,15 @@ running = True
 
 dt = 0
 
-player_pos = pygame.Vector2(maze.mouse)
-chest_pos = pygame.Vector2(maze.exit)
+player_pos = pygame.Vector2(maze.mouse[1], maze.mouse[0]) * config["SCALING_FACTOR"]
+chest_pos = pygame.Vector2(maze.exit[1], maze.exit[0]) * config["SCALING_FACTOR"]
+
 
 # Variable to track if a movement key is being pressed
 is_moving = False
+should_turn = False
+
+path_index = 0
 
 while running:
     for event in pygame.event.get():
@@ -61,24 +68,35 @@ while running:
             else:
                 screen.blit(way_img, (col_index * config["SCALING_FACTOR"], row_index * config["SCALING_FACTOR"]))
                 
-    move_speed = round(50 * dt)
+    move_speed = 300 * dt
+    
 
     screen.blit(chest_img, chest_pos)
         
+    if path_index < len(maze.path):
+        # Get the next position in the path
+        next_position = pygame.Vector2(maze.path[path_index])
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        player_pos.y -= move_speed
-        is_moving = True
-    elif keys[pygame.K_s]:
-        player_pos.y += move_speed
-        is_moving = True
-    elif keys[pygame.K_a]:
-        player_pos.x -= move_speed
-        is_moving = True
-    elif keys[pygame.K_d]:
-        player_pos.x += move_speed
-        is_moving = True
+        # Calculate the direction to move
+        direction = next_position * config["SCALING_FACTOR"] - player_pos
+        direction_length = direction.length()
+        
+        should_turn = False
+       
+        if direction[0] < 0:
+            should_turn = True
+        
+        if direction_length > 0:
+            # Normalize the direction vector and move the player
+            move_vector = direction.normalize() * move_speed
+            player_pos += move_vector
+            
+            # If the player has reached the next position, increment the path_index
+            if direction_length <= move_speed:
+                path_index += 1
+                is_moving = False
+            else:
+                is_moving = True
     else:
         is_moving = False
 
@@ -87,8 +105,12 @@ while running:
         mouse = pygame.image.load(mouse_imgs[counter])
     else:
         mouse = pygame.image.load(mouse_imgs[0])
-
+    
+    if should_turn:
+        mouse = pygame.transform.flip(mouse, True, False)
+        
     mouse = pygame.transform.scale(mouse, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
+   
     screen.blit(mouse, player_pos)
 
     pygame.display.flip()

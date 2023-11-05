@@ -3,5 +3,5 @@ config = {
     "WALL": "1",
     "MOUSE": "m",
     "EXIT": "e",
-    "SCALING_FACTOR": 32
+    "SCALING_FACTOR": 64
 }
