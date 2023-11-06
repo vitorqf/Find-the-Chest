@@ -19,7 +19,7 @@ with open(maze_file, 'r') as file:
     maze_content = file.read().splitlines()
     
 # Aqui, para cada item na primeira linha do arquivo, os separa por espaço e converte em inteiro, definindo a largura e altura
-cols, rows = map(int, maze_content[0].split())
+rows, cols = map(int, maze_content[0].split())
 
 # Remove a primeira linha, contendo as dimensoes do labirinto
 maze_content = maze_content[1:]

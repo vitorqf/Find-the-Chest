@@ -50,12 +50,16 @@ player = pygame.transform.scale(player, (config["SCALING_FACTOR"], config["SCALI
 
 visited_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 visited_rect.set_alpha(184)
-visited_rect.fill((255, 200, 200))
+visited_rect.fill((255, 150, 150))
+
+path_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
+path_rect.set_alpha(184)
+path_rect.fill((150, 150, 255))
 
 pygame.init()
 
 # Cria a tela do jogo de acordo com o tamanho do labirinto e o fator de escala (64 pixels, exemplo: labirinto 8x8, tela: 512x512)
-screen = pygame.display.set_mode((maze.rows * config["SCALING_FACTOR"], maze.cols * config["SCALING_FACTOR"]))
+screen = pygame.display.set_mode((maze.cols * config["SCALING_FACTOR"], maze.rows * config["SCALING_FACTOR"]))
 clock = pygame.time.Clock()
 running = True
 
@@ -103,7 +107,8 @@ while running:
     if not maze.moves.is_empty():
         
         # Define a próxima posição do rato, que é a head da pilha vezes o fator de escala
-        next_pos = pygame.Vector2(maze.moves.peek()) * config["SCALING_FACTOR"]
+        next_pos = pygame.Vector2(maze.moves.peek()[1], maze.moves.peek()[0]) * config["SCALING_FACTOR"]
+
         
         # Define a direção do rato, que é a próxima posição menos a posição atual (ex: posicao do rato=[512, 704], proxima posicao=[512, 768], direcao=[0, 64])
         direction = next_pos - player_pos
@@ -145,14 +150,25 @@ while running:
     screen.blit(pc_img, pc_pos)
     
     if player_pos.distance_to(pc_pos) < move_speed:
+        for pos in maze.visited:
+            if pos not in path:
+                screen.blit(visited_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
+                # Show the coord inside the rect
+                font = pygame.font.Font('freesansbold.ttf', 8)
+                text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
+                textRect = text.get_rect()
+                textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
+                screen.blit(text, textRect)
+            
         for pos in path:
-            screen.blit(visited_rect, pygame.Vector2(pos) * config["SCALING_FACTOR"])
+            screen.blit(path_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
             # Show the coord inside the rect
-            font = pygame.font.Font('freesansbold.ttf', 10)
-            text = font.render(f"{pos}", True, (64, 64, 64))
+            font = pygame.font.Font('freesansbold.ttf', 8)
+            text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
             textRect = text.get_rect()
-            textRect.center = (pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
+            textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
             screen.blit(text, textRect)
+            
             
     pygame.display.flip()
     

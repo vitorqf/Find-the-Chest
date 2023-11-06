@@ -26,13 +26,13 @@ class Maze:
         # Marca a coordenada atual como visitada
         self.__visited.append((row, col))
 
-        # Define movimentos possíveis: esquerda, direita, baixo, cima
-        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        # Define movimentos possíveis: direita, esquerda, baixo, cima
+        moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
         # Para cada movimento no array de movimentos é tentado encontrar um caminho
         for move in moves:
             # Define a nova posição como a posição atual + o movimento, ex: (0, 0) + (-1, 0) = (-1, 0)
-            new_row, new_col = row + move[0], col + move[1]
+            new_col, new_row = col + move[0], row + move[1]
 
             # Checa se a nova posição é válida
             if (
@@ -46,7 +46,7 @@ class Maze:
                 and (new_row, new_col) not in self.__visited
             ):
                 # Se a nova posição for válida, adiciona a posição atual ao array de movimentos
-                self.__moves.push((new_col, new_row))
+                self.__moves.push((new_row, new_col))
                 # Chama a função novamente, passando a nova posição como parâmetro
                 self.find_path_dfs((new_row, new_col))
                 
