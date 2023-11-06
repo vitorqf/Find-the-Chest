@@ -48,6 +48,10 @@ way2_img = pygame.transform.scale(way2_img, (config["SCALING_FACTOR"], config["S
 wall_img = pygame.transform.scale(wall_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 player = pygame.transform.scale(player, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 
+visited_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
+visited_rect.set_alpha(184)
+visited_rect.fill((255, 200, 200))
+
 pygame.init()
 
 # Cria a tela do jogo de acordo com o tamanho do labirinto e o fator de escala (64 pixels, exemplo: labirinto 8x8, tela: 512x512)
@@ -59,6 +63,8 @@ running = True
 is_moving = False
 
 dt = 0
+
+path = []
 
 player_pos = pygame.Vector2(maze.mouse[1], maze.mouse[0]) * config["SCALING_FACTOR"]
 pc_pos = pygame.Vector2(maze.exit[1], maze.exit[0]) * config["SCALING_FACTOR"]
@@ -129,16 +135,25 @@ while running:
         
         # Enquanto o player não estiver 1 passo de distância do próximo passo, o player continua se movendo para o mesmo passo
         if player_pos.distance_to(next_pos) < move_speed:
-            maze.moves.pop()
+            path.append(maze.moves.pop())
             is_moving = False
-    
-
+            
         
     player = pygame.transform.scale(player, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
    
     screen.blit(player, player_pos)
     screen.blit(pc_img, pc_pos)
-
+    
+    if player_pos.distance_to(pc_pos) < move_speed:
+        for pos in path:
+            screen.blit(visited_rect, pygame.Vector2(pos) * config["SCALING_FACTOR"])
+            # Show the coord inside the rect
+            font = pygame.font.Font('freesansbold.ttf', 10)
+            text = font.render(f"{pos}", True, (64, 64, 64))
+            textRect = text.get_rect()
+            textRect.center = (pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
+            screen.blit(text, textRect)
+            
     pygame.display.flip()
     
     dt = clock.tick(config["FPS_LIMIT"]) / 1000
