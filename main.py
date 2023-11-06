@@ -31,7 +31,6 @@ pc_img = pygame.image.load("assets/pc.png")
 way_img = pygame.image.load("assets/way.png")
 way2_img = pygame.image.load("assets/way2.png")
 wall_img = pygame.image.load("assets/wall.png")
-wall_horizontal_img = pygame.image.load("assets/wall_horizontal.png")
 
 spr_direction = "down"
 counter = 0
@@ -41,7 +40,6 @@ pc_img = pygame.transform.scale(pc_img, (config["SCALING_FACTOR"], config["SCALI
 way_img = pygame.transform.scale(way_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 way2_img = pygame.transform.scale(way2_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 wall_img = pygame.transform.scale(wall_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
-wall_horizontal_img = pygame.transform.scale(wall_horizontal_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 player = pygame.transform.scale(player, (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
 
 pygame.init()
