@@ -18,51 +18,51 @@ class Maze:
     
 
     def find_path_dfs(self, current_pos):
-        # Check if the current position is the exit
+        # Se a a coordenada atual for equivalente à saída, define que o caminho foi encontrado
         if current_pos == self.__exit:
             self.__found = True
             return
 
-        # Get the row and column of the current position
+        # Separa a coordenada atual em linha e coluna
         row, col = current_pos
 
-        # Mark the current position as visited
+        # Marca a coordenada atual como visitada
         self.__visited.append((row, col))
 
-        # Define possible moves: up, down, left, right
-        moves = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        # Define movimentos possíveis: esquerda, direita, baixo, cima
+        moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-        # Try each possible move
+        # Para cada movimento no array de movimentos é tentado encontrar um caminho
         for move in moves:
+            # Define a nova posição como a posição atual + o movimento, ex: (0, 0) + (-1, 0) = (-1, 0)
             new_row, new_col = row + move[0], col + move[1]
 
-            # Check if the new position is within bounds and not visited
+            # Checa se a nova posição é válida
             if (
-                0 <= new_row < self.__rows
                 # Checa se é maior ou igual a 0 e se é menor que o numero de linhas
-                and 0 <= new_col < self.__cols
+                0 <= new_row < self.__rows
                 # Checa se é maior ou igual a 0 e se é menor que o numero de colunas
-                and self.__room[new_row][new_col] != config["WALL"]
+                and 0 <= new_col < self.__cols
                 # Checa se a nova posição não é uma parede
-                and (new_row, new_col) not in self.__visited
+                and self.__room[new_row][new_col] != config["WALL"]
                 # Checa se a nova posição não foi visitada
+                and (new_row, new_col) not in self.__visited
             ):
+                # Se a nova posição for válida, adiciona a posição atual ao array de movimentos
                 self.__moves.push((new_col, new_row))
+                # Chama a função novamente, passando a nova posição como parâmetro
                 self.find_path_dfs((new_row, new_col))
                 
 
-                # If the exit is found, return
+                # Se o caminho for encontrado, saia do loop
                 if self.__found:
                     return
 
-                # If not, backtrack
+                # Se o caminho não for encontrado, remove o último movimento do array de movimentos
                 self.__moves.pop()
 
     def find_path(self):
-        # Clear previous results
-        self.__found = False
-
-        # Start the DFS search from the mouse's initial position
+        # Começa o algoritmo de busca em profundidade recursivamente passando a posição inicial do rato como parâmetro
         self.find_path_dfs(self.__mouse)
         
     @property   

@@ -1,9 +1,0 @@
-1110
-000e
-m001
-1111
-
-comeco na 2,0
-posso andar para 1,1 ou 2,1
-
-saida 1,3
