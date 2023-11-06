@@ -10,11 +10,10 @@ class Maze:
         self.__exit = exit
         self.__start = mouse
 
-        # Pilha de movimentos durante a execução do programa, limitada ao tamanho do labirinto
-        self.__moves = Stack(self.__rows * self.__cols)
-
+        self.__moves = Stack()
         self.__visited = []
-        self.__path = []
+        self.__path = Stack()
+        
         self.__found = False
     
 
@@ -48,7 +47,7 @@ class Maze:
                 and (new_row, new_col) not in self.__visited
                 # Checa se a nova posição não foi visitada
             ):
-                self.__path.append((new_col, new_row))
+                self.__moves.push((new_col, new_row))
                 self.find_path_dfs((new_row, new_col))
                 
 
@@ -57,12 +56,10 @@ class Maze:
                     return
 
                 # If not, backtrack
-                self.__path.pop()
+                self.__moves.pop()
 
     def find_path(self):
         # Clear previous results
-        self.__visited = []
-        self.__path = []
         self.__found = False
 
         # Start the DFS search from the mouse's initial position
