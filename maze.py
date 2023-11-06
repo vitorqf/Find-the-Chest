@@ -150,36 +150,3 @@ class Maze:
     
     def __repr__(self) -> str:
         return "\n".join(self.__room)
-
-# Abre o arquivo de labirinto e extrai cada linha para uma posicao de array
-with open("maze16x16.txt", "r") as file:
-    room = file.read().splitlines()
-
-# Aqui, para cada item na primeira linha do arquivo, os separa por espaço e converte em inteiro, definindo a largura e altura
-cols, rows = map(int, room[0].split())
-
-# Remove a primeira linha, contendo as dimensoes do labirinto
-room = room[1:]
-
-# Para cada linha do labirinto, verifica se o rato "m" está presente na linha, se estiver, procura pela primeira ocorrência e define a posição do rato
-# Mesma coisa da anterior, mas buscando a saída
-for index, row in enumerate(room):
-    if config["MOUSE"] in row:
-        mouse_row = index
-        mouse_col = row.index(config["MOUSE"])
-        break
-
-mouse = (mouse_row, mouse_col)
-
-      
-# Mesma coisa da anterior, mas buscando a saída
-for index, row in enumerate(room):
-    if config["EXIT"] in row:
-        exit_row = index
-        exit_col = row.index(config["EXIT"])
-        break
-
-exit = (exit_row, exit_col)
-
-# Create the Maze object
-maze = Maze(room, rows, cols, mouse, exit)

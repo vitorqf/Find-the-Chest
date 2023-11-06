@@ -1,6 +1,6 @@
 import pygame
 from config import config
-from maze import maze
+from builder import maze
 
 # Inicia o algoritmo de busca
 maze.find_path()
@@ -11,6 +11,12 @@ if maze.found:
 else:
     print("No path found")
     exit()
+    
+if maze.rows > 20 or maze.cols > 20:
+    config["SCALING_FACTOR"] = 32
+    
+if maze.rows > 60 or maze.cols > 60:
+    config["SCALING_FACTOR"] = 16
     
 player_imgs = {
     "up": [
