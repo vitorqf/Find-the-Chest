@@ -9,13 +9,10 @@ class Maze:
         self.__mouse = mouse
         self.__exit = exit
         self.__start = mouse
+        self.__found = False
 
         self.__moves = Stack()
         self.__visited = []
-        self.__path = Stack()
-        
-        self.__found = False
-    
 
     def find_path_dfs(self, current_pos):
         # Se a a coordenada atual for equivalente à saída, define que o caminho foi encontrado
@@ -53,7 +50,6 @@ class Maze:
                 # Chama a função novamente, passando a nova posição como parâmetro
                 self.find_path_dfs((new_row, new_col))
                 
-
                 # Se o caminho for encontrado, saia do loop
                 if self.__found:
                     return
@@ -94,10 +90,6 @@ class Maze:
         return self.__visited
     
     @property
-    def path(self):
-        return self.__path
-    
-    @property
     def found(self):
         return self.__found
     
@@ -132,10 +124,6 @@ class Maze:
     @visited.setter
     def visited(self, new_visited):
         self.__visited = new_visited
-    
-    @path.setter
-    def path(self, new_path):
-        self.__path = new_path
     
     @found.setter
     def found(self, new_found):
