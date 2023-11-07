@@ -3,7 +3,7 @@ from config import config
 from builder import maze
 
 def initialize_game():
-    pygame.init()
+    pygame.init()    
     screen = pygame.display.set_mode((maze.cols * config["SCALING_FACTOR"], maze.rows * config["SCALING_FACTOR"]))
     clock = pygame.time.Clock()
     return screen, clock
@@ -33,6 +33,14 @@ def initialize_assets():
         ]
     }
     
+    pallet_town = pygame.mixer.Sound("assets/pallet.wav")
+    caught = pygame.mixer.Sound("assets/caught.wav")
+    
+    caught.set_volume(0.03)
+    pallet_town.set_volume(0.04)
+    
+    pallet_town.play(fade_ms=1000)
+    
     lugia_imgs = ["assets/lugia.png", "assets/lugia1.png"]
     way_img = pygame.image.load("assets/way.png")
     way2_img = pygame.image.load("assets/way2.png")
@@ -40,10 +48,12 @@ def initialize_assets():
 
     return {
         "player_imgs": player_imgs,
-        "pc_imgs": lugia_imgs,
+        "lugia_imgs": lugia_imgs,
         "way_img": pygame.transform.scale(way_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"])),
         "way2_img": pygame.transform.scale(way2_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"])),
         "wall_img": pygame.transform.scale(wall_img, (config["SCALING_FACTOR"], config["SCALING_FACTOR"])),
+        "pallet_town": pallet_town,
+        "caught": caught,
     }
 
 def draw_paths(path, visited, font, screen):
@@ -67,8 +77,9 @@ def draw_paths(path, visited, font, screen):
         textRect = text.get_rect()
         textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
         screen.blit(text, textRect)
+    
 
-def render_game(screen, player_pos, pc_pos, path, font, assets, move_speed):
+def render_game(screen, player_pos, lugia_pos, path, font, assets, move_speed):
     # Interpreta as coordenadas do labirinto e renderiza as imagens com base nas coordenadas e fator de escala
     for row_index, row in enumerate(maze.room):
         for col_index, col in enumerate(row):
@@ -84,21 +95,21 @@ def render_game(screen, player_pos, pc_pos, path, font, assets, move_speed):
     # Renderiza o player na posição atual
     screen.blit(assets["player"], player_pos)
 
-    # Renderiza o PC na posição atual
-    screen.blit(assets["pc"], pc_pos)
+    # Renderiza o lugia na posição atual
+    screen.blit(assets["lugia"], lugia_pos)
     
     # Renderiza os caminhos quando o player chegar ao final
-    if player_pos.distance_to(pc_pos) <= move_speed:
+    if player_pos.distance_to(lugia_pos) <= move_speed:        
         draw_paths(path, maze.visited, font, screen)
 
     pygame.display.flip()
 
-def game_loop(player_pos, pc_pos):
-    screen, clock = initialize_game()
+def game_loop(player_pos, lugia_pos):
+    screen, clock  = initialize_game()
     assets = initialize_assets()
     font = pygame.font.Font('freesansbold.ttf', 8)
     counter = 0
-    
+    lugia_caught = 0
     
     while True:
         if not handle_input():
@@ -132,7 +143,7 @@ def game_loop(player_pos, pc_pos):
                 spr_direction = "up"
 
             # A cada frame, o contador é incrementado em 0.2
-            counter += pygame.time.Clock().tick(config["FPS_LIMIT"]) / 1000 * 5
+            counter += pygame.time.Clock().tick(config["FPS_LIMIT"]) / 1000 * 3.5
             
             # Caso o contador seja maior ou igual ao tamanho do array de imagens, reseta o contador
             if counter >= len(assets["player_imgs"][spr_direction]):
@@ -142,17 +153,24 @@ def game_loop(player_pos, pc_pos):
             assets["player"] = pygame.image.load(assets["player_imgs"][spr_direction][int(counter)])
             assets["player"] = pygame.transform.scale(assets["player"], (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
             
-            # Define a imagem do PC como a imagem atual da animação (se o contador for 0.2, 0.4, 0.6... a imagem será a primeira, se for 1.2, 1.2, 1.4..., será a segunda, e assim por diante)
-            assets["pc"] = pygame.image.load(assets["pc_imgs"][int(counter) % 2])
-            assets["pc"] = pygame.transform.scale(assets["pc"], (config["SCALING_FACTOR"] * 1.05, config["SCALING_FACTOR"] * 1.05))
+            # Define a imagem do lugia como a imagem atual da animação (se o contador for 0.2, 0.4, 0.6... a imagem será a primeira, se for 1.2, 1.2, 1.4..., será a segunda, e assim por diante)
+            # Como ele só tem duas imagens, o contador é dividido por 2
+            assets["lugia"] = pygame.image.load(assets["lugia_imgs"][int(counter) % 2])
+            assets["lugia"] = pygame.transform.scale(assets["lugia"], (config["SCALING_FACTOR"] * 1.05, config["SCALING_FACTOR"] * 1.05))
 
             # Se a distância entre a posição atual e a próxima posição for menor que a velocidade do movimento, adiciona a posição atual ao array de caminho
             # Isso é feito para que o player não pule posições e se mova de forma suave, de acordo com a velocidade do jogo
             if player_pos.distance_to(next_pos) < move_speed:
                 maze.path.append(maze.moves.pop())
+                
+                # Verifica se o player chegou ao final do labirinto e se o lugia_caught ainda não está setado como true
+                if not lugia_caught and player_pos.distance_to(lugia_pos) <= move_speed:
+                    assets["caught"].play()
+                    assets["pallet_town"].stop()
+                    lugia_caught = True
 
         # Renderiza o jogo
-        render_game(screen, player_pos, pc_pos, maze.path, font, assets, move_speed)
+        render_game(screen, player_pos, lugia_pos, maze.path, font, assets, move_speed)
 
     pygame.quit()  # Fecha a instancia do pygame quando sair do loop
 
@@ -162,13 +180,14 @@ if __name__ == "__main__":
     # Responsividade
     if maze.rows > 60 or maze.cols > 60:
         config["SCALING_FACTOR"] = config["SCALING_FACTOR_SMALL"]
+        config["SPEED"] = config["SPEED_FAST"]
         
     if maze.rows > 30 or maze.cols > 30:
         config["SCALING_FACTOR"] = config["SCALING_FACTOR_NORMAL"]
 
-    # Define a posição inicial do player e do PC (rato e queijo)
+    # Define a posição inicial do player e do lugia (rato e queijo)
     player_pos = pygame.Vector2(maze.mouse[1], maze.mouse[0]) * config["SCALING_FACTOR"]
-    pc_pos = pygame.Vector2(maze.exit[1], maze.exit[0]) * config["SCALING_FACTOR"]
+    lugia_pos = pygame.Vector2(maze.exit[1], maze.exit[0]) * config["SCALING_FACTOR"]
 
     # Inicia o loop principal do jogo
-    game_loop(player_pos, pc_pos)
+    game_loop(player_pos, lugia_pos)
