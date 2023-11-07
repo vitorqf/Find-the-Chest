@@ -32,6 +32,10 @@ for index, row in enumerate(maze_content):
         mouse_col = row.index(config["MOUSE"])
         break
 
+# Se o rato não for encontrado, lança uma exceção
+if not mouse_row or not mouse_col:
+    raise Exception("Mouse not found in maze")
+
 mouse = (mouse_row, mouse_col)
 
 # Mesma coisa da anterior, mas buscando a saída
@@ -40,6 +44,10 @@ for index, row in enumerate(maze_content):
         exit_row = index
         exit_col = row.index(config["EXIT"])
         break
+
+# Se a saída não for encontrada, lança uma exceção
+if not exit_row or not exit_col:
+    raise Exception("Exit not found in maze")
 
 exit = (exit_row, exit_col)
 

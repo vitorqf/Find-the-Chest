@@ -8,11 +8,11 @@ class Maze:
         self.__cols = cols
         self.__mouse = mouse
         self.__exit = exit
-        self.__start = mouse
         self.__found = False
 
         self.__moves = Stack()
         self.__visited = []
+        self.__path = []
 
     def find_path_dfs(self, current_pos):
         # Se a a coordenada atual for equivalente à saída, define que o caminho foi encontrado
@@ -27,6 +27,7 @@ class Maze:
         self.__visited.append((row, col))
 
         # Define movimentos possíveis: direita, esquerda, baixo, cima
+        # x, y
         moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
         # Para cada movimento no array de movimentos é tentado encontrar um caminho
@@ -61,6 +62,13 @@ class Maze:
         # Começa o algoritmo de busca em profundidade recursivamente passando a posição inicial do rato como parâmetro
         self.find_path_dfs(self.__mouse)
         
+        if self.__found:
+            self.__moves = self.__moves.reverse()
+            
+        else:
+            print("No path found")
+            exit()
+        
     @property   
     def mouse(self):
         return self.__mouse
@@ -88,6 +96,10 @@ class Maze:
     @property
     def visited(self):
         return self.__visited
+    
+    @property
+    def path(self):
+        return self.__path
     
     @property
     def found(self):
@@ -132,6 +144,10 @@ class Maze:
     @start.setter
     def start(self, new_start):
         self.__start = new_start
+        
+    @path.setter
+    def path(self, new_path):
+        self.__path = new_path
         
     def __str__(self) -> str:
         return "\n".join(self.__room)
