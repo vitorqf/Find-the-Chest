@@ -9,4 +9,6 @@ config = {
     "FPS_LIMIT": 30,
     "SPEED": 200,
     "SPEED_FAST": 400,
+    "CATCH_VOLUME": 0.06,
+    "MUSIC_VOLUME": 0.09,
 }

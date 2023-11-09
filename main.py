@@ -36,8 +36,8 @@ def initialize_assets():
     pallet_town = pygame.mixer.Sound("assets/pallet.wav")
     caught = pygame.mixer.Sound("assets/caught.wav")
     
-    caught.set_volume(0.03)
-    pallet_town.set_volume(0.04)
+    caught.set_volume(config["CATCH_VOLUME"])
+    pallet_town.set_volume(config["MUSIC_VOLUME"])
     
     pallet_town.play(fade_ms=1000)
     
