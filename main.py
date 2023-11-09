@@ -6,6 +6,8 @@ def initialize_game():
     pygame.init()    
     screen = pygame.display.set_mode((maze.cols * config["SCALING_FACTOR"], maze.rows * config["SCALING_FACTOR"]))
     clock = pygame.time.Clock()
+    pygame.display.set_caption("Lugia Hunt")
+    pygame.display.set_icon(pygame.image.load("assets/lugia.png"))
     return screen, clock
 
 def handle_input():
@@ -63,13 +65,23 @@ def draw_paths(path, visited, font, screen):
     path_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
     path_rect.fill((150, 150, 255, 184))
 
+    initial_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
+    initial_rect.fill((255, 255, 255, 184))
     for pos in visited:
-        if pos not in path:
+        if visited.index(pos) == 0:
+            screen.blit(initial_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
+            text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
+            textRect = text.get_rect()
+            textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
+            screen.blit(text, textRect)
+            
+        elif pos not in path:
             screen.blit(visited_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
             text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
             textRect = text.get_rect()
             textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
             screen.blit(text, textRect)
+            
 
     for pos in path:
         screen.blit(path_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
@@ -148,7 +160,6 @@ def game_loop(player_pos, lugia_pos):
             # Caso o contador seja maior ou igual ao tamanho do array de imagens, reseta o contador
             if counter >= len(assets["player_imgs"][spr_direction]):
                 counter = 0 
-
             # Define a imagem do player como a imagem atual da animação (se o contador for 0.2, 0.4, 0.6... a imagem será a primeira, se for 1.2, 1.2, 1.4..., será a segunda, e assim por diante)
             assets["player"] = pygame.image.load(assets["player_imgs"][spr_direction][int(counter)])
             assets["player"] = pygame.transform.scale(assets["player"], (config["SCALING_FACTOR"], config["SCALING_FACTOR"]))
