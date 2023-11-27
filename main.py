@@ -58,40 +58,33 @@ def initialize_assets():
         "caught": caught,
     }
 
-def draw_paths(path, visited, font, screen):
-    visited_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
-    visited_rect.fill((255, 150, 150, 184))
-
-    path_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
-    path_rect.fill((150, 150, 255, 184))
-
-    initial_rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
-    initial_rect.fill((255, 255, 255, 184))
-    for pos in visited:
-        if visited.index(pos) == 0:
-            screen.blit(initial_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
-            text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
-            textRect = text.get_rect()
-            textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
-            screen.blit(text, textRect)
-            
-        elif pos not in path:
-            screen.blit(visited_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
-            text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
-            textRect = text.get_rect()
-            textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
-            screen.blit(text, textRect)
-            
-
-    for pos in path:
-        screen.blit(path_rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
-        text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
-        textRect = text.get_rect()
-        textRect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
-        screen.blit(text, textRect)
+# Método para renderizar um quadrado na posição passada como parâmetro
+def render_position(pos, rect_color, font, screen):
+    rect = pygame.Surface((config["SCALING_FACTOR"], config["SCALING_FACTOR"]), pygame.SRCALPHA)
+    rect.fill(rect_color)
+    screen.blit(rect, pygame.Vector2(pos[1], pos[0]) * config["SCALING_FACTOR"])
     
+    text = font.render(f"{pos[1], pos[0]}", True, (64, 64, 64))
+    text_rect = text.get_rect()
+    text_rect.center = (pos[1] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2, pos[0] * config["SCALING_FACTOR"] + config["SCALING_FACTOR"] / 2)
+    screen.blit(text, text_rect)
 
-def render_game(screen, player_pos, lugia_pos, path, font, assets, move_speed):
+def draw_paths(path, visited, font, screen):
+    for pos in visited:
+        # Desenha um quadrado vermelho para o caminho incorreto
+        if pos not in path:
+            render_position(pos, (255, 150, 150, 184), font, screen)
+        
+        # Desenha um quadrado branco para a posicao inicial
+        if visited.index(pos) == 0:
+            render_position(pos, (255, 255, 255, 184), font, screen)
+    
+    # Desenha um quadrado azulado para o caminho correto
+    for pos in path:
+        render_position(pos, (150, 150, 255, 184), font, screen)
+
+
+def render_game(screen, player_pos, lugia_pos, path, font, assets, lugia_caught):
     # Interpreta as coordenadas do labirinto e renderiza as imagens com base nas coordenadas e fator de escala
     for row_index, row in enumerate(maze.room):
         for col_index, col in enumerate(row):
@@ -111,7 +104,7 @@ def render_game(screen, player_pos, lugia_pos, path, font, assets, move_speed):
     screen.blit(assets["lugia"], lugia_pos)
     
     # Renderiza os caminhos quando o player chegar ao final
-    if player_pos.distance_to(lugia_pos) <= move_speed:        
+    if lugia_caught:        
         draw_paths(path, maze.visited, font, screen)
 
     pygame.display.flip()
@@ -121,7 +114,7 @@ def game_loop(player_pos, lugia_pos):
     assets = initialize_assets()
     font = pygame.font.Font('freesansbold.ttf', 8)
     counter = 0
-    lugia_caught = 0
+    lugia_caught = False
     
     while True:
         if not handle_input():
@@ -181,20 +174,20 @@ def game_loop(player_pos, lugia_pos):
                     lugia_caught = True
 
         # Renderiza o jogo
-        render_game(screen, player_pos, lugia_pos, maze.path, font, assets, move_speed)
+        render_game(screen, player_pos, lugia_pos, maze.path, font, assets, lugia_caught)
 
     pygame.quit()  # Fecha a instancia do pygame quando sair do loop
 
 if __name__ == "__main__":
     maze.find_path()
     
-    # Responsividade
+    # Responsividade 
+    if maze.rows > 30 or maze.cols > 30:
+        config["SCALING_FACTOR"] = config["SCALING_FACTOR_NORMAL"]
+        
     if maze.rows > 60 or maze.cols > 60:
         config["SCALING_FACTOR"] = config["SCALING_FACTOR_SMALL"]
         config["SPEED"] = config["SPEED_FAST"]
-        
-    if maze.rows > 30 or maze.cols > 30:
-        config["SCALING_FACTOR"] = config["SCALING_FACTOR_NORMAL"]
 
     # Define a posição inicial do player e do lugia (rato e queijo)
     player_pos = pygame.Vector2(maze.mouse[1], maze.mouse[0]) * config["SCALING_FACTOR"]

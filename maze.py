@@ -1,5 +1,6 @@
 from config import config
 from stack import Stack
+from collections import deque
 
 class Maze:
     def __init__(self, room, rows, cols, mouse, exit):
@@ -11,7 +12,7 @@ class Maze:
         self.__found = False
 
         self.__moves = Stack()
-        self.__visited = []
+        self.__visited = deque()
         self.__path = []
 
     def find_path_dfs(self, current_pos):
